@@ -1,3 +1,8 @@
+// A simple PowerBI function that creates a TimeStamp Table in PowerQuery with UTC Offset time for use in the PowerBI Service. 
+// Original Idea from DataTraining.IO on their "How to Power BI" youtube channel. Converted into a function for repeatable use. 
+// 
+// https://www.youtube.com/watch?v=xOj7KNqe_cI
+//
 let TimeStampTable = (DSTStartOffsetHours as number, DSTEndOffSetHours as number) as table =>
     let
     SummerTime = Date.StartOfWeek( #date(Date.Year(DateTime.LocalNow()), 3, 14), Day.Sunday),
