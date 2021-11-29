@@ -1,0 +1,22 @@
+let TimeStampTable = (DSTStartOffsetHours as number, DSTEndOffSetHours as number) as table =>
+    let
+    SummerTime = Date.StartOfWeek( #date(Date.Year(DateTime.LocalNow()), 3, 14), Day.Sunday),
+    WinterTime = Date.StartOfWeek( #date(Date.Year(DateTime.LocalNow()), 11, 14), Day.Sunday),
+    CurrentDateTime = DateTimeZone.RemoveZone(DateTimeZone.UtcNow()),
+    TimeShiftFromUTC = if CurrentDateTime < SummerTime & #time(1, 0, 0) or CurrentDateTime > WinterTime & #time(1, 0, 0) then DSTStartOffsetHours else DSTEndOffSetHours,
+    TimeStamp = DateTimeZone.SwitchZone( DateTimeZone.UtcNow(), TimeShiftFromUTC, 0),
+    ConvertToTable = #table(1, {{TimeStamp}}),
+    RenameColumns = Table.RenameColumns(ConvertToTable,{{"Column1", "TimeStamp"}}),
+    ChangeType = Table.TransformColumnTypes(RenameColumns,{{"TimeStamp", type datetimezone}})
+in
+    ChangeType, documentation = [
+        Documentation.Name = "fxTimeStamp",
+        Documentation.Description = " Timestamp function to create correct TimeStamp with UTC offset when refreshing with PowerBI Service",
+        Documentation.Category = "Table",
+        Documentation.Author = "Ryan Darling",
+        Documentation.Examples = { [Description ="",
+            Code = "[DSTStartOffSetHours] The number of hours difference from UTC time during Daylight Savings Time. US the summertime is between March and November #(lf)#(lf)[DSTEndOffSetHours] The number of hours difference from UTC time during Daylight Savings Time. US the wintertime is between November and March.",
+        Result = " "] }
+    ]
+in
+    Value.ReplaceType(TimeStampTable, Value.ReplaceMetadata(Value.Type(TimeStampTable), documentation))
